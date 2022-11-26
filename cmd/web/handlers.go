@@ -20,24 +20,8 @@ func (a *application) home(w http.ResponseWriter, r *http.Request) {
 		a.serveError(w, err)
 		return
 	}
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%v", snippet)
-	}
-	// files := []string{
-	// 	"./ui/html/home.page.tmpl",
-	// 	"./ui/html/base.layout.tmpl",
-	// 	"./ui/html/footer.partial.tmpl",
-	// }
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	a.serveError(w, err)
-	// 	return
-	// }
-	// err = ts.Execute(w, nil)
-	// if err != nil {
-	// 	a.serveError(w, err)
-	// 	return
-	// }
+	data := &templateData{Snippets: snippets}
+	a.render(w, r, "home.page.tmpl", data)
 }
 func (a *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -71,5 +55,8 @@ func (a *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	fmt.Fprintf(w, "%v", s)
+	data := &templateData{
+		Snippet: s,
+	}
+	a.render(w, r, "show.page.tmpl", data)
 }

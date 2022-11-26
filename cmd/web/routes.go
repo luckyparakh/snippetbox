@@ -1,8 +1,13 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
 
-func (app *application) routes() *http.ServeMux {
+	"github.com/justinas/alice"
+)
+
+func (app *application) routes() http.Handler {
+	standardMW := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.home)
 	mux.HandleFunc("/showSnippet", app.showSnippet)
@@ -12,5 +17,6 @@ func (app *application) routes() *http.ServeMux {
 	// Since our request URL is /static/css/main.css, it will try to look for a file inside root directory with the path /ui/static/static/css/main.css and it doesn’t exist.
 	// we need to remove /static part from the URL
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-	return mux
+	return standardMW.Then(mux)
+	// return app.recoverPanic(app.logRequest(secureHeaders(mux)))
 }
